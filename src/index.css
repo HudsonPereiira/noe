@@ -37,7 +37,7 @@ body {
   line-height: 1.625;
   white-space: pre-wrap;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  min-height: 700px;
+  min-height: 750px;
   margin-bottom: 3rem;
 }
 
@@ -55,7 +55,8 @@ body {
 .add-button,
 .del-button,
 .search-button,
-.edit-button {
+.edit-button,
+.att-button {
   background-color: #009a3e;
   color: #ffffff;
   padding: 10px 20px;
@@ -80,6 +81,11 @@ body {
 
 .button {
   background-color: #007bff;
+}
+
+.att-button {
+  background-color: #009a3e;
+  border-bottom: 1rem;
 }
 
 /* Área de botões do admin */
@@ -125,7 +131,8 @@ textarea:focus {
 }
 
 /* Responsividade */
-@media (max-width: 768px), (max-width: 600px), (max-width: 480px) {
+
+@media (max-width: 768px), (max-width: 740px), (max-width: 600px), (max-width: 480px) {
   .box-dados {
     padding: 15px;
     max-width: 90%;
@@ -140,6 +147,7 @@ textarea:focus {
     padding: 0;
     margin: 0;
   }
+   
 
   input,
   textarea {
@@ -161,20 +169,18 @@ textarea:focus {
   .add-button,
   .del-button,
   .search-button,
-  .edit-button {
+  .edit-button,
+  .att-button {
     width: 100%;
     padding: 10px;
     margin: 0.3rem 0;
     font-size: 0.95em;
   }
 
-  .search-button {
+  .search-button, .add-button, .att-button {
     margin-bottom: 2rem;
   }
 
-  .add-button {
-    margin-bottom: 3rem;
-  }
 
   .campo-busca {
     display: flex;
@@ -189,4 +195,5 @@ textarea:focus {
     margin-top: 1rem;
     align-items: flex-start; /* Alinha à esquerda no mobile */
   }
+
 }

@@ -1,5 +1,5 @@
 import Navbar from "../components/Navbar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   collection,
   getDocs,
@@ -20,11 +20,21 @@ function Home() {
   const [cidade, setCidade] = useState("");
   const [descricao, setDescricao] = useState("");
   const [editandoId, setEditandoId] = useState(null);
+  const [mostrarResultados, setMostrarResultados] = useState(false);
 
   const { usuario, carregando } = useAuth();
 
   const adminEmail = "noe@casamilitar.es.gov.br";
   const ehAdmin = usuario?.email === adminEmail;
+
+  const descricaoRef = useRef(null);
+  const ajustarAltura = () => {
+    const el = descricaoRef.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = el.scrollHeight + "px";
+    }
+  };
 
   const buscarDados = async () => {
     try {
@@ -45,10 +55,18 @@ function Home() {
       const snapshot = await getDocs(q);
       const lista = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setDados(lista);
+      setMostrarResultados(true);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     }
   };
+
+  useEffect(() => {
+    if (!busca.trim()) {
+      setMostrarResultados(false);
+      setDados([]);
+    }
+  }, [busca]);
 
   const handleAdd = async () => {
     if (!cidade || !descricao) {
@@ -106,10 +124,6 @@ function Home() {
     }
   };
 
-  useEffect(() => {
-    buscarDados();
-  }, []);
-
   if (carregando) {
     return (
       <div className="verificando-login">
@@ -121,11 +135,11 @@ function Home() {
   return (
     <div className="pagina-home">
       <Navbar />
-  
+
       <div className="container-centralizado">
         <div className="box-dados">
           <h1 className="titulo">Lista de Dados</h1>
-  
+
           <div className="campo-busca linha">
             <input
               type="text"
@@ -137,7 +151,7 @@ function Home() {
               Buscar
             </button>
           </div>
-  
+
           {ehAdmin && (
             <div className="formulario-admin coluna">
               <input
@@ -146,16 +160,20 @@ function Home() {
                 value={cidade}
                 onChange={(e) => setCidade(e.target.value)}
               />
-  
+
               <textarea
+                ref={descricaoRef}
                 placeholder="Descrição com links e detalhes..."
                 value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
-                rows={4}
+                onChange={(e) => {
+                  setDescricao(e.target.value);
+                  ajustarAltura();
+                }}
+                rows={1}
               />
-  
+
               {editandoId ? (
-                <button onClick={handleUpdate} className="btn-atualizar">
+                <button onClick={handleUpdate} className="att-button">
                   Atualizar
                 </button>
               ) : (
@@ -165,40 +183,50 @@ function Home() {
               )}
             </div>
           )}
-  
-          <ul className="lista-dados">
-            {dados.map((item) => (
-              <li key={item.id} className="item-dado">
-              <div className="descricao-formatada">
-                
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: item.descricao.replace(
-                      /(\b(https?:\/\/)?(www\.)?[\w-]+\.[\w./?=&%-]+)/gi,
-                      (match) => {
-                        const href = match.startsWith("http")
-                          ? match
-                          : `https://${match}`;
-                        return `<a href="${href}" target="_blank" rel="noopener noreferrer">${match}</a>`;
-                      }
-                    ),
-                  }}
-                />
-                {ehAdmin && (
-                  <div className="acoes-admin">
-                    <button onClick={() => handleEdit(item)} className="add-button">
-                      Editar
-                    </button>
-                    <button onClick={() => handleDelete(item.id)} className="del-button">
-                      Excluir
-                    </button>
-                  </div>
-                )}
-              </div>
-            </li>
-            
-            ))}
-          </ul>
+
+          {mostrarResultados && (
+            <ul className="lista-dados">
+              {dados.length === 0 ? (
+                <p>Nenhum dado encontrado.</p>
+              ) : (
+                dados.map((item) => (
+                  <li key={item.id} className="item-dado">
+                    <div className="descricao-formatada">
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: item.descricao.replace(
+                            /(\b(https?:\/\/)?(www\.)?[\w-]+\.[\w./?=&%-]+)/gi,
+                            (match) => {
+                              const href = match.startsWith("http")
+                                ? match
+                                : `https://${match}`;
+                              return `<a href="${href}" target="_blank" rel="noopener noreferrer">${match}</a>`;
+                            }
+                          ),
+                        }}
+                      />
+                      {ehAdmin && (
+                        <div className="acoes-admin">
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="add-button"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="del-button"
+                          >
+                            Excluir
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))
+              )}
+            </ul>
+          )}
         </div>
       </div>
     </div>
